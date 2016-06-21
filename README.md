@@ -15,9 +15,9 @@ npm install --save easy-rest-client
 ```
 
 This assumes you are using [npm](https://www.npmjs.com/) as your package manager.  
-You can use this function as [CommonJS](http://webpack.github.io/docs/commonjs.html) module. This module is what you get when you import `paginationBuilder` in a [Webpack](http://webpack.github.io), [Browserify](http://browserify.org/), or a Node environment.
+You can use this as [CommonJS](http://webpack.github.io/docs/commonjs.html) module. This module is what you get when you import `easy-rest-client` in a [Webpack](http://webpack.github.io), [Browserify](http://browserify.org/), or a Node environment.
 
-If you don’t use a module bundler, it’s also fine. The `paginationBuilder` npm package includes precompiled production and development [UMD](https://github.com/umdjs/umd) builds in the `dist` folder. They can be used directly without a bundler and are thus compatible with many popular JavaScript module loaders and environments. For example, you can drop a UMD build as a `<script>path to /dist/easy-rest-client.js</script>` on the page. The UMD build make `RestClient` available as a `window.easyRestClient.default` global variable.
+If you don’t use a module bundler, it’s also fine. The `easy-rest-client` npm package includes precompiled production and development [UMD](https://github.com/umdjs/umd) builds in the `dist` folder. They can be used directly without a bundler and are thus compatible with many popular JavaScript module loaders and environments. For example, you can drop a UMD build as a `<script>path to /dist/easy-rest-client.js</script>` on the page. The UMD build make module code available as a `window.easyRestClient` global variable.
 
 The source code is written in ES2015 but we precompile both CommonJS and UMD builds to ES5 so they work in [any modern browser](http://caniuse.com/#feat=es5). You don’t need to use Babel or a module bundler.
 
@@ -29,8 +29,8 @@ import RestClient from 'easy-rest-client';
 
 const client = new RestClient('https://someyourapi.host', {
     headers: {
-        accept: JSON_CONTENT_TYPE,
-        contentType: JSON_CONTENT_TYPE
+        accept: 'application/json',
+        contentType: 'application/json; charset=utf-8'
     },
     fetch: {
         mode: 'cors',
