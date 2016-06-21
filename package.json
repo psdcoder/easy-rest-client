@@ -1,0 +1,62 @@
+{
+  "name": "easy-rest-client",
+  "version": "0.0.1",
+  "description": "Rest client with simplest and convenient API",
+  "main": "lib/index.js",
+  "jsnext:main": "es/index.js",
+  "files": [
+    "dist",
+    "src",
+    "lib",
+    "es"
+  ],
+  "scripts": {
+    "test": "cross-env BABEL_ENV=commonjs mocha --compilers js:babel-register",
+    "test:watch": "npm test -- --watch",
+    "lint": "eslint src",
+    "clean": "rimraf dist",
+    "prepublish": "npm run clean && npm run lint && npm run test && npm run build",
+    "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir lib",
+    "build:es": "cross-env BABEL_ENV=es babel src --out-dir es",
+    "build:umd": "cross-env BABEL_ENV=commonjs NODE_ENV=development webpack src/index.js dist/easy-rest-client.js",
+    "build:umd:min": "cross-env BABEL_ENV=commonjs NODE_ENV=production webpack src/index.js dist/easy-rest-client.min.js",
+    "build": "npm run build:commonjs && npm run build:es && npm run build:umd && npm run build:umd:min",
+    "precommit": "git diff-index --cached HEAD --name-only --diff-filter ACMR | grep -E \"\\.jsx?$\" | xargs ./node_modules/.bin/eslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PSDCoder/easy-rest-client.git"
+  },
+  "keywords": [
+    "rest",
+    "client",
+    "easy",
+    "http",
+    "crud"
+  ],
+  "author": "Pavel Grinchenko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PSDCoder/easy-rest-client/issues"
+  },
+  "homepage": "https://github.com/PSDCoder/easy-rest-client#readme",
+  "devDependencies": {
+    "babel-cli": "^6.9.0",
+    "babel-core": "^6.9.1",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015-webpack": "^6.4.1",
+    "chai": "^3.5.0",
+    "cross-env": "^1.0.8",
+    "eslint": "^2.11.1",
+    "eslint-config-airbnb-base": "^3.0.1",
+    "eslint-plugin-import": "^1.8.1",
+    "husky": "^0.11.4",
+    "mocha": "^2.5.3",
+    "rimraf": "^2.5.2",
+    "webpack": "^2.1.0-beta.13"
+  },
+  "dependencies": {
+    "isomorphic-fetch": "^2.2.1",
+    "lodash": "^4.13.1"
+  }
+}

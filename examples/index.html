@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SWAPI test</title>
+    <script src="../dist/easy-rest-client.js"></script>
+</head>
+<body>
+<script>
+    var client = new window.easyRestClient.RestClient('http://swapi.co/api/', { trailing: true });
+
+    client
+            .resource('starships')
+            .list()
+            .then(function (response) {
+                var pre = document.createElement('pre');
+                var code = document.createElement('code');
+
+                pre.appendChild(code);
+                code.innerHTML = JSON.stringify(response.body, null, 4);
+
+                document.body.appendChild(pre);
+            });
+</script>
+</body>
+</html>
