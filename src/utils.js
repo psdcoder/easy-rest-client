@@ -1,13 +1,13 @@
-import isArray from 'lodash/isArray';
+import isPlainObject from 'lodash/isPlainObject';
 
-export function buildUrl(path, queryParams = {}, trailing = false) {
-    let resultPath = isArray(path) ? path.join('/') : path;
+export function buildUrl(path, queryParams, trailing = false) {
+    let resultPath = path;
 
     if (trailing) {
         resultPath += '/';
     }
 
-    if (Object.keys(queryParams).length) {
+    if (isPlainObject(queryParams) && Object.keys(queryParams).length) {
         resultPath += `?${encodeUrl(queryParams)}`;
     }
 

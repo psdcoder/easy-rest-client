@@ -2,20 +2,12 @@ import fetch from 'isomorphic-fetch';
 import assign from 'lodash/assign';
 import camelCase from 'lodash/camelCase';
 import startCase from 'lodash/startCase';
-import isString from 'lodash/isString';
 import isArray from 'lodash/isArray';
-import isObject from 'lodash/isObject';
 
 import RestClientResource from './resource';
-import { encodeUrl } from './utils';
-import {
-    START_SLASH,
-    END_SLASH,
-    ALLOWED_METHODS,
-    DEFAULT_OPTIONS,
-    JSON_CONTENT_TYPE,
-    URL_ENCODED_CONTENT_TYPE
-} from './constants';
+import { encodeUrl, buildUrl } from './utils';
+import * as validators from './validators';
+import { START_SLASH, END_SLASH, DEFAULT_OPTIONS, JSON_CONTENT_TYPE, URL_ENCODED_CONTENT_TYPE } from './constants';
 
 const JSON_ONLY_CONTENT_TYPE = JSON_CONTENT_TYPE.split(';')[0];
 
@@ -28,82 +20,56 @@ export default class RestClient {
         return this._host;
     }
     setHost(host) {
-        if (!isString(host)) {
-            throw new Error('You MUST pass string as "host"');
-        }
-
+        validators.isValidHost(host);
         this._host = host.replace(END_SLASH, '');
     }
     getOptions() {
         return this._options;
     }
     setOptions(options) {
-        if (!isObject(options)) {
-            throw new Error('You MUST pass object as "options"');
-        }
-
+        validators.isValidRestClientOptions(options);
         this._options = assign(this._options || {}, options);
     }
     resource(path) {
-        if (!isString(path)) {
-            throw new Error('You MUST pass string as "path" to resource');
-        }
-
+        validators.isValidResource(path);
         return new RestClientResource(this, path);
     }
-    request(method, url, body = null, headers = {}, fetchOptions = {}) {
-        if (!isString(method)) {
-            throw new Error('You MUST pass string as "method",');
-        }
+    request(urlParam, options) {
+        validators.isValidRequestUrlParam(urlParam);
+        validators.isValidRequestOptions(options);
 
-        const uppercasedMethod = method.toUpperCase();
+        const urlParamIsArray = isArray(urlParam);
+        const queryParams = urlParamIsArray ? urlParam[1] : null;
+        let url = urlParam;
 
-        if (ALLOWED_METHODS.indexOf(uppercasedMethod) === -1) {
-            throw new Error(`
-                You are trying use unsupported request method: ${method}.
-                Supported methods: ${ALLOWED_METHODS.join(', ')}
-            `.replace(/^\s*/, ''));
-        }
-
-        if (!isString(url)) {
-            throw new Error('You must pass string as "url"');
-        }
-
-        if (!isObject(headers)) {
-            throw new Error('You must pass object as "headers"');
-        }
-
-        if (!isObject(headers)) {
-            throw new Error('You must pass object as "headers"');
+        if (urlParamIsArray) {
+            url = START_SLASH.test(urlParam[0]) ? `${this._host}${urlParam[0]}` : urlParam[0];
         }
 
         let request = {
-            url: START_SLASH.test(url) ? `${this._host}${url}` : url,
-            options: Object.assign({}, this._options.fetch, fetchOptions, {
-                method: uppercasedMethod,
-                headers: Object.assign({}, this._options.headers, headers)
-            })
+            url: buildUrl(url, queryParams, this._options.trailing),
+            options: Object.assign({}, this._options, options)
         };
 
-        if (body) {
+        if (options && 'body' in options) {
             const contentType = request.options.headers.contentType;
 
             if (
-                (window.ArrayBuffer && body instanceof window.ArrayBuffer)
-                || (window.Blob && body instanceof window.Blob)
-                || (window.FormData && body instanceof window.FormData)
+                (window.ArrayBuffer && options.body instanceof window.ArrayBuffer)
+                || (window.Blob && options.body instanceof window.Blob)
+                || (window.FormData && options.body instanceof window.FormData)
             ) {
                 if (contentType) {
                     delete request.options.headers.contentType;
                 }
 
-                request.options.body = body;
+                request.options.body = options.body;
             } else if (contentType && contentType === JSON_CONTENT_TYPE) {
-                request.options.body = JSON.stringify(body);
+                request.options.body = JSON.stringify(options.body);
             } else if (contentType && contentType === URL_ENCODED_CONTENT_TYPE) {
-                request.options.body = encodeUrl(body);
+                request.options.body = encodeUrl(options.body);
             } else {
-                request.options.body = body;
+                request.options.body = options.body;
             }
         }
 

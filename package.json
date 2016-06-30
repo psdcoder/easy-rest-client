@@ -14,13 +14,13 @@
     "test": "cross-env BABEL_ENV=commonjs mocha --compilers js:babel-register",
     "test:watch": "npm test -- --watch",
     "lint": "eslint src",
-    "clean": "rimraf dist",
-    "prepublish": "npm run clean && npm run lint && npm run test && npm run build",
+    "clean": "rimraf dist lib es",
+    "prepublish": "npm run lint && npm run test && npm run build",
     "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir lib",
     "build:es": "cross-env BABEL_ENV=es babel src --out-dir es",
     "build:umd": "cross-env BABEL_ENV=commonjs NODE_ENV=development webpack src/index.js dist/easy-rest-client.js",
     "build:umd:min": "cross-env BABEL_ENV=commonjs NODE_ENV=production webpack src/index.js dist/easy-rest-client.min.js",
-    "build": "npm run build:commonjs && npm run build:es && npm run build:umd && npm run build:umd:min",
+    "build": "npm run clean && npm run build:commonjs && npm run build:es && npm run build:umd && npm run build:umd:min",
     "precommit": "git diff-index --cached HEAD --name-only --diff-filter ACMR | grep -E \"\\.jsx?$\" | xargs ./node_modules/.bin/eslint"
   },
   "repository": {
