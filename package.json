@@ -1,6 +1,6 @@
 {
   "name": "easy-rest-client",
-  "version": "1.0.0-0",
+  "version": "1.0.0-1",
   "description": "Rest client with simplest and convenient API",
   "main": "lib/index.js",
   "jsnext:main": "es/index.js",
