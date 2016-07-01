@@ -1,5 +1,21 @@
 import isPlainObject from 'lodash/isPlainObject';
 
+import { START_SLASH, END_SLASH } from './constants';
+
+export function trimSlashes(path, start = true, end = true) {
+    let resultPath = path;
+
+    if (start) {
+        resultPath = resultPath.replace(START_SLASH, '');
+    }
+
+    if (end) {
+        resultPath = resultPath.replace(END_SLASH, '');
+    }
+
+    return resultPath;
+}
+
 export function buildUrl(path, queryParams, trailing = false) {
     let resultPath = path;
 

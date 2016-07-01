@@ -1,5 +1,5 @@
 import isArray from 'lodash/isArray';
-import { END_SLASH, START_SLASH } from './constants';
+import { trimSlashes } from './utils';
 import * as validators from './validators';
 
 export default class RestClientResource {
@@ -7,10 +7,8 @@ export default class RestClientResource {
         validators.isValidRestClientInstance(restClient);
         validators.isValidResource(path);
 
-        const preparedPath = path.replace(END_SLASH, '');
-
         this._restClient = restClient;
-        this._path = START_SLASH.test(preparedPath) ? preparedPath : `/${preparedPath}`;
+        this._path = trimSlashes(path);
     }
     getRestClient() {
         return this._restClient;
@@ -19,7 +17,16 @@ export default class RestClientResource {
         return new RestClientResource(this._restClient, path);
     }
     request(urlParam, options) {
-        return this._restClient.request(urlParam, options);
+        validators.isValidRequestUrlParam(urlParam);
+        const pathIsArray = isArray(urlParam);
+
+        return this._restClient.request(
+            [
+                `/${this._path}/${trimSlashes(pathIsArray ? urlParam[0] : urlParam)}`,
+                pathIsArray ? urlParam[1] : null
+            ],
+            options
+        );
     }
     list(queryParams, options) {
         return this._restClient.request(
@@ -52,6 +59,6 @@ export default class RestClientResource {
         );
     }
     _buildResourcePath(path) {
-        return isArray(path) ? path.map(part => encodeURIComponent(part)).join('/') : path;
+        return isArray(path) ? `/${path.map(part => encodeURIComponent(part)).join('/')}` : `/${path}`;
     }
 }

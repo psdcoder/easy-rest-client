@@ -1,34 +1,33 @@
 import fetch from 'isomorphic-fetch';
-import assign from 'lodash/assign';
 import camelCase from 'lodash/camelCase';
 import startCase from 'lodash/startCase';
 import isArray from 'lodash/isArray';
 
 import RestClientResource from './resource';
-import { encodeUrl, buildUrl } from './utils';
+import { trimSlashes, encodeUrl, buildUrl } from './utils';
 import * as validators from './validators';
-import { START_SLASH, END_SLASH, DEFAULT_OPTIONS, JSON_CONTENT_TYPE, URL_ENCODED_CONTENT_TYPE } from './constants';
+import { START_SLASH, DEFAULT_OPTIONS, JSON_CONTENT_TYPE, URL_ENCODED_CONTENT_TYPE } from './constants';
 
 const JSON_ONLY_CONTENT_TYPE = JSON_CONTENT_TYPE.split(';')[0];
 
 export default class RestClient {
     constructor(host, options) {
         this.setHost(host);
-        this.setOptions(assign(DEFAULT_OPTIONS, options));
+        this.setOptions(Object.assign(DEFAULT_OPTIONS, options));
     }
     getHost() {
         return this._host;
     }
     setHost(host) {
         validators.isValidHost(host);
-        this._host = host.replace(END_SLASH, '');
+        this._host = trimSlashes(host, false, true);
     }
     getOptions() {
         return this._options;
     }
     setOptions(options) {
         validators.isValidRestClientOptions(options);
-        this._options = assign(this._options || {}, options);
+        this._options = Object.assign(this._options || {}, options);
     }
     resource(path) {
         validators.isValidResource(path);
@@ -48,7 +47,13 @@ export default class RestClient {
 
         let request = {
             url: buildUrl(url, queryParams, this._options.trailing),
-            options: Object.assign({}, this._options, options)
+            options: Object.assign(
+                {},
+                this._options.fetch,
+                { headers: this._options.headers },
+                options,
+                { method: options && options.method ? options.method.toUpperCase() : 'GET' }
+            )
         };
 
         if (options && 'body' in options) {
@@ -102,15 +107,6 @@ export default class RestClient {
 
         return resultHeaders;
     }
-    _formatResponseHeaders(headers) {
-        const resultHeaders = {};
-
-        for (const pair of headers.entries()) {
-            resultHeaders[camelCase(pair[0])] = pair[1];
-        }
-
-        return resultHeaders;
-    }
     _prepareResponse(request, response) {
         const headers = this._formatResponseHeaders(response.headers);
         const isJson = headers.contentType
@@ -124,5 +120,14 @@ export default class RestClient {
             headers,
             body: parsedBody
         }));
+    }
+    _formatResponseHeaders(headers) {
+        const resultHeaders = {};
+
+        headers.forEach((value, name) => {
+            resultHeaders[camelCase(name)] = value;
+        });
+
+        return resultHeaders;
     }
 }

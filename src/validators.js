@@ -35,11 +35,18 @@ export function isValidRequestUrlParam(urlParam) {
 }
 
 export function isValidRequestOptions(options) {
+    if (options === undefined) {
+        return;
+    }
+
     if (!isPlainObject(options)) {
         throw new Error('You MUST pass object as "options" param');
     }
 
-    if (!isString(options.method) || ALLOWED_METHODS.indexOf(options.method.toUpperCase()) === -1) {
+    if (
+        'method' in options
+        && (!isString(options.method) || ALLOWED_METHODS.indexOf(options.method.toUpperCase()) === -1)
+    ) {
         throw new Error(`
             You are trying use unsupported request method: ${options.method}.
             Supported methods: ${ALLOWED_METHODS.join(', ')}
